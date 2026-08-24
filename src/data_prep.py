@@ -63,3 +63,34 @@ def CheckDuplicate(df):
     print("remove duplicates:\n",df.drop_duplicates())
 
     return df.drop_duplicates()
+
+def SplitData(df):
+    x = df.drop("Class", axis=1)
+    y = df["Class"]
+
+    x_train, x_test, y_train, y_test = train_test_split(
+        x,
+        y,
+        test_size=0.2,
+        stratify=y,
+        random_state=42
+    )
+
+    return x_train, x_test, y_train, y_test
+
+def prepare_data(df):
+
+    df = CheckDuplicate(df)
+
+    X_train, X_test, y_train, y_test = SplitData(df)
+
+    return (
+        X_train,
+        X_test,
+        y_train,
+        y_test,
+    )
+
+def scaler():
+    return StandardScaler()
+
