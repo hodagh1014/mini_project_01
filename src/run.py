@@ -19,7 +19,10 @@ from train import (
     cross_validate_model,
     compare_hyperparameters_KNN,
     compare_thresholds,
-    save_model
+    save_model,
+    train_neural_network_sklearn,
+    evaluate_neural_network ,
+    cross_validate_neural_network
 )
 from predict import load_model, load_scaler, predict
 
@@ -64,34 +67,48 @@ def main():
     knn_model = train_knn(X_train, y_train)
     print("   Decision Tree   ")
     dt_model = train_decision_tree(X_train, y_train)
+    print("   Neural Network (MLP)...")
+    nn_model= train_neural_network_sklearn(X_train, y_train)
     print("All models trained!")
     
     # 5. ارزیابی
-    print("\n[5] Evaluating models")
+    print("\n[5] Evaluating models...")
+
     models = {
         "Logistic Regression": lr_model,
         "KNN": knn_model,
-        "Decision Tree": dt_model
+        "Decision Tree": dt_model,
+        "Neural Network": nn_model
     }
-    results = {}
-    print("\n   Model| Accuracy | Precision | Recall | F1-Score")
 
-    for name, model in models.items():
-        eval_results = evaluate_model(model, X_test, y_test)
-        results[name] = eval_results
-        
-        # ساده با +
-        print("   " + name + " | " + str(eval_results['accuracy']) + " | " + str(eval_results['precision']) + " | " + str(eval_results['recall']) + " | " + str(eval_results['f1']))
-        print("   Confusion Matrix: " + str(eval_results['confusion_matrix']))
+    results = {}
+
+    print("\n   Model | Accuracy | Precision | Recall | F1-Score")
     
+    for name, model in models.items():
+       if name == "Neural Network":
+           nn_results = evaluate_neural_network(nn_model, X_test, y_test)
+           results[name] = nn_results
+           print("   " + name + " | " + str(nn_results['accuracy']) + " | " + str(nn_results['precision']) + " | " + str(nn_results['recall']) + " | " + str(nn_results['f1']))
+           print("   Confusion Matrix: " + str(nn_results['confusion_matrix']))
+       else:
+           eval_results = evaluate_model(model, X_test, y_test)
+           results[name] = eval_results
+           print("   " + name + " | " + str(eval_results['accuracy']) + " | " + str(eval_results['precision']) + " | " + str(eval_results['recall']) + " | " + str(eval_results['f1']))
+           print("   Confusion Matrix: " + str(eval_results['confusion_matrix']))
     # 6. Cross Validation
     print("\n[6] Cross Validation (5-Fold)")
+
     print("\n   Model | Precision | Recall | F1-Score")
+
     for name, model in models.items():
-        cv_scores = cross_validate_model(model, X_train, y_train)
-        print("   " + name + " | " + str(cv_scores['mean_precision']) + " | " + str(cv_scores['mean_recall']) + " | " + str(cv_scores['mean_f1']))
-
-
+       if name == "Neural Network":
+           cv_nn_results = cross_validate_neural_network(X_train, y_train)
+           print("   " + name + " | " + str(cv_nn_results['mean_precision']) + " | " + str(cv_nn_results['mean_recall']) + " | " + str(cv_nn_results['mean_f1']))
+       else:
+           cv_scores = cross_validate_model(model, X_train, y_train)
+           print("   " + name + " | " + str(cv_scores['mean_precision']) + " | " + str(cv_scores['mean_recall']) + " | " + str(cv_scores['mean_f1']))
+  
     print("\n[7] KNN with/without scaling")
 
     # KNN بدون Scaling
@@ -112,32 +129,41 @@ def main():
     for res in knn_params:
        print("   K=" + str(res['k']) + " | " + str(res['precision']) + " | " + str(res['recall']) + " | " + str(res['f1']))
     
-    # 8. Threshold
+    # 9. Threshold
     print("\n[9] Threshold Experiment")
     thresholds = compare_thresholds(knn_model, X_test, y_test)
     print("\n   Threshold | Precision | Recall | F1-Score")
     for res in thresholds:
         print("   " + str(res['threshold']) + " | " + str(res['precision']) + " | " + str(res['recall']) + " | " + str(res['f1']))
     
-    # 9. انتخاب بهترین
-    print("\n[10] Selecting best model")
+    # 10. انتخاب بهترین
+    print("\n[10] Selecting best model...")
+
+    # انتخاب از بین همه مدل‌ها)
     best_name = max(results, key=lambda x: results[x]['f1'])
     best_model = models[best_name]
     best_f1 = results[best_name]['f1']
     best_threshold = max(thresholds, key=lambda x: x['f1'])['threshold']
+
     print("   Best Model: " + best_name)
     print("   F1-Score: " + str(best_f1))
     print("   Best Threshold: " + str(best_threshold))
     
-    # 10. ذخیره
-    print("\n[11] Saving model")
+    # 11. ذخیره مدل
+    print("\n[11] Saving model...")
     os.makedirs("models", exist_ok=True)
-    save_model(best_model, "models/model.pkl")
-    print("Model saved to models/model.pkl")
-    if best_name == "KNN":
-        scaler_obj = best_model.named_steps['scaler']
-        joblib.dump(scaler_obj, "models/scaler.pkl")
-        print("   Scaler saved to models/scaler.pkl")
+
+    if best_name == "Neural Network":
+       joblib.dump(best_model, "models/nn_model.pkl")
+       print("   Neural Network saved to models/nn_model.pkl")
+    else:
+       save_model(best_model, "models/model.pkl")
+       print("   Model saved to models/model.pkl")
+    
+       if best_name == "KNN":
+          scaler_obj = best_model.named_steps['scaler']
+          joblib.dump(scaler_obj, "models/scaler.pkl")
+          print("   Scaler saved to models/scaler.pkl")
     
     # گزارش نهایی
     print("FINAL REPORT")
@@ -205,8 +231,5 @@ def test_prediction():
 if __name__ == "__main__":
     # اجرای آموزش و آزمایش‌ها
     main()
-    
-    print("\n" + "=" * 60)
     print("RUNNING PREDICTION TEST")
-    print("=" * 60)
     test_prediction()
