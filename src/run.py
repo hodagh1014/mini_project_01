@@ -181,55 +181,112 @@ def main():
 # تست پیش‌بینی
 
 def test_prediction():
-    
+
     print("PREDICTION TEST")
-    
-    # نمونه داده ورودی 
+
+
     df = Load_data()
+
     X_train, X_test, y_train, y_test = prepare_data(df)
+
     import random
-    random_index = random.randint(0, len(X_test) - 1)
+
+    random_index = random.randint(
+        0,
+        len(X_test) - 1
+    )
+
     sample_input = X_test.iloc[random_index].to_dict()
-    
+
     try:
-        # 1. بارگذاری مدل
+
         print("\n[1] Loading model")
-        model = load_model()
+
+        model = load_model(
+            "models/nn_model.pkl"
+        )
+
         print("Model loaded successfully")
-        
-        # 2. بارگذاری اسکیلر
-        print("\n[2] Loading scaler")
-        scaler = load_scaler()
-        if scaler is not None:
-            print(" Scaler loaded successfully")
+
+        print("\n[2] Making prediction")
+
+
+        selected_threshold = 0.3
+
+        result = predict(
+            model=model,
+            input_data=sample_input,
+            threshold=selected_threshold
+        )
+
+        print("\n[3] Result:")
+
+        print(
+            json.dumps(
+                result,
+                indent=2
+            )
+        )
+
+        if result["status"] == "success":
+
+            print("\n[4] Interpretation:")
+
+            print(
+                "    Transaction is: "
+                + result["prediction"]
+            )
+
+            print(
+                "    Probability of fraud: "
+                + str(
+                    result["probability"] * 100
+                )
+                + "%"
+            )
+
+            print(
+                "    Threshold used: "
+                + str(result["threshold"])
+            )
+
+            print(
+                "    Status: "
+                + result["status"]
+            )
+
         else:
-            print(" No scaler found, proceeding without scaling")
-        
-        # 3. انجام پیش‌بینی
-        print("\n[3] Making prediction")
-        result = predict(model, sample_input, scaler, threshold=0.5)
-        
-        # 4. نمایش نتیجه
-        print("\n[4] Result:")
-        print(json.dumps(result, indent=2))
-        
-        # 5. تفسیر نتیجه
-        print("\n[5] Interpretation:")
-        print("    Transaction is: " + result['prediction'])
-        print("    Probability of fraud: " + str(result['probability'] * 100) + "%")
-        print("    Threshold used: " + str(result['threshold']))
-        print("    Status: " + result['status'])
-        
+
+            print("\nPrediction failed.")
+
+            print(
+                "Error: "
+                + result["message"]
+            )
+
+
     except FileNotFoundError as e:
-        print("\n Error: " + str(e))
-        print("    Please train the model first by running: python main.py")
+
+        print("\nError: " + str(e))
+
+        print(
+            "Please train the model first by running:"
+        )
+
+        print(
+            "python main.py"
+        )
+
+
     except Exception as e:
-        print("\n Unexpected error: " + str(e))
 
-
+        print(
+            "\nUnexpected error: "
+            + str(e)
+        )
 # اجرا
 if __name__ == "__main__":
-    # اجرای آموزش و آزمایش‌ها
+
     main()
     
     print("RUNNING PREDICTION TEST")
