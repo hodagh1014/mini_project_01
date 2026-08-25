@@ -16,12 +16,15 @@ from data_prep import (
 )
 
 def train_logistic_regression(x_train, y_train):
-    model = LogisticRegression(
-        max_iter=1000,          
-        class_weight="balanced",
-        random_state=42
-    )
-    return train_model(model, x_train, y_train) 
+    model = Pipeline([
+        ("scaler", scaler()),  
+        ("logreg", LogisticRegression(
+            max_iter=2000,
+            class_weight="balanced",
+            random_state=42
+        ))
+    ])
+    return train_model(model, x_train, y_train)
 
 def train_knn(x_train, y_train):
     model = Pipeline([
