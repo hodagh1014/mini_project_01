@@ -231,5 +231,6 @@ def test_prediction():
 if __name__ == "__main__":
     # اجرای آموزش و آزمایش‌ها
     main()
+    
     print("RUNNING PREDICTION TEST")
     test_prediction()
