@@ -202,7 +202,7 @@ def test_prediction():
 
 
 # اجرا
-if __name__ == "__run__":
+if __name__ == "__main__":
     # اجرای آموزش و آزمایش‌ها
     main()
     
