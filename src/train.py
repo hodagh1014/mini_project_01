@@ -4,6 +4,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import StratifiedKFold, cross_validate
 from sklearn.neural_network import MLPClassifier
+import numpy as np
 from sklearn.metrics import (
     accuracy_score,
     recall_score,
@@ -126,16 +127,11 @@ def evaluate_neural_network(model, X_test, y_test):
 
 def cross_validate_neural_network(X, y, n_splits=5):
 
-    from sklearn.model_selection import StratifiedKFold, cross_validate
-    from sklearn.neural_network import MLPClassifier
-    from sklearn.preprocessing import StandardScaler
-    from sklearn.pipeline import Pipeline
-    import numpy as np
-    
+
     cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
     
     model = Pipeline([
-        ("scaler", StandardScaler()),
+        ("scaler", scaler()),
         ("mlp", MLPClassifier(
             hidden_layer_sizes=(64, 32, 16),
             activation='relu',
