@@ -152,15 +152,14 @@ def main():
     # 11. ذخیره مدل
     print("\n[11] Saving model...")
     os.makedirs("models", exist_ok=True)
+    joblib.dump(best_model, "models/model.pkl")
+    print(" Model saved to models/model.pkl")
 
     if best_name == "Neural Network":
        joblib.dump(best_model, "models/nn_model.pkl")
        print("   Neural Network saved to models/nn_model.pkl")
-    else:
-       save_model(best_model, "models/model.pkl")
-       print("   Model saved to models/model.pkl")
     
-       if best_name == "KNN":
+    if best_name == "KNN":
           scaler_obj = best_model.named_steps['scaler']
           joblib.dump(scaler_obj, "models/scaler.pkl")
           print("   Scaler saved to models/scaler.pkl")
@@ -220,69 +219,31 @@ def test_prediction():
 
         print("\n[3] Result:")
 
-        print(
-            json.dumps(
-                result,
-                indent=2
-            )
-        )
+        print(json.dumps(result,indent=2))
 
         if result["status"] == "success":
 
             print("\n[4] Interpretation:")
-
-            print(
-                "    Transaction is: "
-                + result["prediction"]
-            )
-
-            print(
-                "    Probability of fraud: "
-                + str(
-                    result["probability"] * 100
-                )
-                + "%"
-            )
-
-            print(
-                "    Threshold used: "
-                + str(result["threshold"])
-            )
-
-            print(
-                "    Status: "
-                + result["status"]
-            )
+            print("Transaction is: " + result["prediction"])
+            print(" Probability of fraud: "+ str( result["probability"] * 100)+ "%" )
+            print(" Threshold used: "+ str(result["threshold"]))
+            print("Status: " + result["status"])
 
         else:
 
             print("\nPrediction failed.")
-
-            print(
-                "Error: "
-                + result["message"]
-            )
-
+            print("Error: "+ result["message"])
 
     except FileNotFoundError as e:
 
         print("\nError: " + str(e))
-
-        print(
-            "Please train the model first by running:"
-        )
-
-        print(
-            "python main.py"
-        )
+        print("Please train the model first by running:" )
+        print("python main.py")
 
 
     except Exception as e:
 
-        print(
-            "\nUnexpected error: "
-            + str(e)
-        )
+        print("\nUnexpected error: "+ str(e))
 
 
 if __name__ == "__main__":
