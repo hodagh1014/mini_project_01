@@ -27,9 +27,9 @@ from train import (
 from predict import load_model, load_scaler, predict
 
 
-# ============================================
+
 # آموزش و آزمایش‌ها
-# ============================================
+
 def main():
 
     print("CREDIT CARD FRAUD DETECTION - TRAINING PIPELINE")
@@ -165,7 +165,6 @@ def main():
           joblib.dump(scaler_obj, "models/scaler.pkl")
           print("   Scaler saved to models/scaler.pkl")
     
-    # گزارش نهایی
     print("FINAL REPORT")
     print("   Best Model:              " + best_name)
     print("   Test F1-Score:           " + str(best_f1))
@@ -178,7 +177,7 @@ def main():
 
 
 
-# تست پیش‌بینی
+
 
 def test_prediction():
 
@@ -284,7 +283,8 @@ def test_prediction():
             "\nUnexpected error: "
             + str(e)
         )
-# اجرا
+
+
 if __name__ == "__main__":
 
     main()
